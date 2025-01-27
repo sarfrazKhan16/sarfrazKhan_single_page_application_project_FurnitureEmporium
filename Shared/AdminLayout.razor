@@ -1,0 +1,45 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+@using FurnitureEmporium.Authentication
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+
+    <div class="navbar">
+        <div class="logo">
+            <h1>FurnitureEmporium</h1>
+        </div>
+        <div class="nav-links">
+            <a href="/add-product">Add Product</a>
+            <a href="/admin-products">View Products</a>
+        </div>
+        <div class="user-info">
+            <span>Welcome, Admin</span>
+            <a href="#" @onclick="Logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        @Body
+    </div>
+
+
+@code {
+    private bool IsAdmin;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        // Check if the user is an admin
+        IsAdmin = user.Identity.IsAuthenticated && user.Identity.Name == "Admin";
+    }
+
+    private void Logout()
+    {
+        var customAuthProvider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
+        customAuthProvider.MarkUserAsLoggedOut();
+        NavigationManager.NavigateTo("/login");
+    }
+}

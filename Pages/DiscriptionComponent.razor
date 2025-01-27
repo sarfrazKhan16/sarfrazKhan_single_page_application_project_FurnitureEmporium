@@ -1,0 +1,200 @@
+﻿@page "/product/{productId:int}"
+@using FurnitureEmporium.Models.Entity
+@using FurnitureEmporium.Models.Interface
+@inject IProductRepository ProductRepository
+@inject ICartRepository CartRepository
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+<div class="product-detail-container">
+    @if (product != null)
+    {
+        <div class="product-image">
+            <img src="@product.ImageUrl" alt="@product.Name" />
+        </div>
+
+        <div class="product-info">
+            <h2 class="product-title">@product.Name</h2>
+            <p class="product-brand">Category: @product.Category</p>
+            <p class="product-price">$@product.Price</p>
+
+            <p class="product-description">
+                @product.Description
+            </p>
+
+            <div class="product-colors">
+                <p>Colors</p>
+                <span class="color-circle" style="background-color: red;"></span>
+                <span class="color-circle" style="background-color: green;"></span>
+                <span class="color-circle" style="background-color: blue;"></span>
+            </div>
+
+            <div class="product-quantity">
+                <p>Amount</p>
+                <select class="form-control" @bind="selectedQuantity">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <option value="@i">@i</option>
+                    }
+                </select>
+            </div>
+
+            <button class="btn btn-primary add-to-bag" @onclick="AddToCart">Add to Bag</button>
+            @if (!string.IsNullOrEmpty(AddToCartMessage))
+            {
+                <p class="cart-message" style="color: green;">@AddToCartMessage</p>
+            }
+        </div>
+    }
+    else
+    {
+        <p>Loading product details...</p>
+    }
+</div>
+
+<style>
+    /* Container layout */
+    .product-detail-container {
+        display: flex;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        gap: 2rem;
+    }
+
+    /* Product image styling */
+    .product-image img {
+        width: 100%;
+        max-width: 500px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Product information styling */
+    .product-info {
+        max-width: 600px;
+    }
+
+    .product-title {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #1a1a2e;
+    }
+
+    .product-brand {
+        font-size: 1.1rem;
+        color: #9a9a9a;
+        margin-bottom: 1rem;
+    }
+
+    .product-price {
+        font-size: 1.5rem;
+        color: #007bff;
+        margin-bottom: 1rem;
+    }
+
+    .product-description {
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .product-colors p {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .color-circle {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+        border: 2px solid #e0e0e0;
+        cursor: pointer;
+    }
+
+    .product-quantity {
+        margin-top: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+        .product-quantity p {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+    .form-control {
+        padding: 0.5rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+    }
+
+    .add-to-bag {
+        background-color: #6f42c1;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-weight: bold;
+        font-size: 1rem;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+        .add-to-bag:hover {
+            background-color: #5a369d;
+        }
+</style>
+
+@code {
+    [Parameter]
+    public int productId { get; set; }
+
+    private Product product;
+    private int selectedQuantity = 1;
+    private string AddToCartMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch product details
+        product = await ProductRepository.GetProductByIdAsync(productId);
+    }
+
+    private async Task AddToCart()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            AddToCartMessage = "You must be logged in to add items to the cart.";
+            return;
+        }
+
+        try
+        {
+            var userId = int.Parse(user.FindFirst("UserId").Value); // Ensure "UserId" claim is added in your authentication process
+
+            var cartItem = new Cart
+                {
+                    UserId = userId,
+                    ProductId = product.Id,
+                    Quantity = selectedQuantity,
+                    CreatedAt = DateTime.Now
+                };
+
+            await CartRepository.AddToCartAsync(cartItem);
+            AddToCartMessage = $"{product.Name} has been added to your cart.";
+        }
+        catch (Exception ex)
+        {
+            AddToCartMessage = "Failed to add product to cart. Please try again.";
+            Console.WriteLine($"Error adding to cart: {ex.Message}");
+        }
+    }
+
+
+}

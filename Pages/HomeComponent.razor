@@ -1,0 +1,161 @@
+﻿@page "/"
+
+<div class="container my-5">
+    <div class="row align-items-center">
+        <!-- Text Content -->
+        <div class="col-lg-6">
+            <h1 class="display-4 font-weight-bold text-dark">We are changing the way people shop</h1>
+            <p class="lead text-muted mt-3">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Tempore repellat explicabo enim soluta temporibus asperiores aut obcaecati perferendis porro nobis.</p>
+            <a href="#" class="btn btn-primary mt-4">Our Products</a>
+        </div>
+
+        <!-- Image Section -->
+        <div class="col-lg-6">
+            <div class="image-container">
+                <img src="images/home1.png" alt="Living Room Furniture" class="img-fluid rounded-left" />
+                <img src="images/home1.png" alt="Modern Table Design" class="img-fluid rounded-right" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Feature Products-->
+<div class="container my-5">
+    <h2 class="section-title text-dark">Featured Products</h2>
+    <div class="row">
+        <!-- Product Card 1 -->
+        <div class="col-md-4">
+            <div class="product-card">
+                <img src="images/home1.png" alt="Avant-Garde Lamp" class="product-image">
+                <h5 class="product-title">Avant-Garde Lamp</h5>
+                <p class="product-price">$179.99</p>
+            </div>
+        </div>
+
+        <!-- Product Card 2 -->
+        <div class="col-md-4">
+            <div class="product-card">
+                <img src="images/home1.png" alt="Coffee Table" class="product-image">
+                <h5 class="product-title">Coffee Table</h5>
+                <p class="product-price">$179.99</p>
+            </div>
+        </div>
+
+        <!-- Product Card 3 -->
+        <div class="col-md-4">
+            <div class="product-card">
+                <img src="images/home1.png" alt="Comfy Bed" class="product-image">
+                <h5 class="product-title">Comfy Bed</h5>
+                <p class="product-price">$129.99</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Container styling */
+    .container {
+        max-width: 1200px;
+    }
+
+    /* Image container styling */
+    .image-container {
+        display: flex;
+        border-radius: 15px;
+        overflow: hidden;
+        border: 5px solid #0a1931;
+    }
+
+        .image-container img {
+            width: 50%;
+            object-fit: cover;
+        }
+
+            .image-container img.rounded-left {
+                border-radius: 15px 0 0 15px;
+            }
+
+            .image-container img.rounded-right {
+                border-radius: 0 15px 15px 0;
+            }
+
+    /* Button styling */
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+    /* Heading styling */
+    h1 {
+        color: #1a1a2e;
+    }
+
+    /* Text styling */
+    p.lead {
+        font-size: 1.1rem;
+        color: #6c757d;
+    }
+
+    /* Section title styling */
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+        color: #1a1a2e;
+    }
+
+    /* Product card styling */
+    .product-card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: box-shadow 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+        .product-card:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+    /* Product image styling */
+    .product-image {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover .product-image {
+        transform: scale(1.05);
+    }
+
+    /* Product title styling */
+    .product-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #1a1a2e;
+        margin-top: 0.5rem;
+    }
+
+    /* Product price styling */
+    .product-price {
+        font-size: 1.1rem;
+        color: #6f42c1;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+</style>
+
+@code {
+    }

@@ -1,0 +1,77 @@
+﻿@page "/login"
+@using FurnitureEmporium.Models.Interface
+@inject IUserinterface UserService
+@inject NavigationManager NavigationManager
+@using FurnitureEmporium.Authentication
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <InputText id="email" class="form-control" @bind-Value="loginModel.Email" />
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password</label>
+        <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
+    </div>
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="alert alert-danger">@ErrorMessage</div>
+    }
+
+    <button type="submit" class="btn btn-primary">Login</button>
+</EditForm>
+
+@code {
+    private LoginModel loginModel = new LoginModel();
+    private string ErrorMessage { get; set; } = string.Empty;
+
+    private async Task HandleLogin()
+    {
+        try
+        {
+            if (loginModel.Email == "iamadmin@gmail.com" && loginModel.Password == "iamadmin")
+            {
+                // Handle admin login
+                var customAuthProvider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
+                customAuthProvider.MarkUserAsAuthenticated("Admin", loginModel.Email, userId: 0); // Admin UserId set to 0
+                NavigationManager.NavigateTo("/add-product");
+            }
+            else
+            {
+                var isAuthenticated = await UserService.AuthenticateUserAsync(loginModel.Email, loginModel.Password);
+
+                if (isAuthenticated)
+                {
+                    var userName = await UserService.GetUserNameByEmailAsync(loginModel.Email);
+                    var userId = await UserService.GetUserIdByEmailAsync(loginModel.Email); // Fetch UserId from the database
+
+                    var customAuthProvider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
+                    customAuthProvider.MarkUserAsAuthenticated(userName, loginModel.Email, userId);
+
+                    NavigationManager.NavigateTo("/");
+                }
+                else
+                {
+                    ErrorMessage = "Invalid email or password. Please try again.";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "An error occurred during login. Please try again later.";
+            Console.WriteLine($"Error during login: {ex.Message}");
+        }
+    }
+
+    private class LoginModel
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
+    }
+}

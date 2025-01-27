@@ -1,0 +1,205 @@
+﻿@using FurnitureEmporium.Authentication
+@inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<PageTitle>FurnitureEmporium</PageTitle>
+
+<div class="page">
+    <main>
+        <!-- Sign in/Login Bar -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <div class="navbar-nav ml-auto">
+                    @if (IsAuthenticated)
+                    {
+                        <span class="nav-link text-light">Hello, @UserName</span>
+                        <span class="nav-separator">|</span>
+                        <a class="nav-link text-light" href="#" @onclick="Logout">Logout</a>
+                    }
+                    else
+                    {
+                        <NavLink class="nav-link text-light" href="/login">Sign in</NavLink>
+                        <span class="nav-separator">|</span>
+                        <NavLink class="nav-link text-light" href="/register">Create Account</NavLink>
+                    }
+                </div>
+            </div>
+        </nav>
+
+        <!-- Navigation Bar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar">
+            <div class="container">
+                <!-- Logo and Brand Name -->
+                <a class="navbar-brand d-flex align-items-center" href="/">
+                    <div class="logo-box">F</div>
+                    <span class="brand-name">FurnitureEmporium</span>
+                </a>
+
+                <!-- Navigation Links -->
+                <div class="navbar-nav mx-auto">
+                    <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">Home</NavLink>
+                    <NavLink class="nav-link" href="/about">About</NavLink>
+                    <NavLink class="nav-link" href="/products">Products</NavLink>
+                    <NavLink class="nav-link" href="/cart">Cart</NavLink>
+                </div>
+
+                <!-- Icons (Dark Mode and Cart) -->
+                <div class="navbar-icons d-flex align-items-center">
+                    <a href="#" class="icon-link">
+                        <img src="/images/moon.png" alt="Dark Mode Icon" class="cart-icon-img">
+                    </a>
+                    <a href="/cart" class="icon-link position-relative">
+                        <img src="/images/shopping-cart.png" alt="Cart Icon" class="cart-icon-img">
+                        <span class="badge badge-primary cart-badge">1</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Styling for the layout -->
+        <style>
+            /* SiginLoginBar */
+            .cart-icon-img {
+                width: 24px; /* Set the size of the cart icon image */
+                height: 24px;
+            }
+
+            .navbar {
+                background-color: #0a1931; /* Deep blue background */
+            }
+
+            .navbar-nav .nav-link {
+                font-size: 1rem; /* Adjust font size */
+                padding: 0.5rem 1rem; /* Add padding for spacing */
+                color: #ffffff; /* White text */
+                transition: color 0.3s ease-in-out;
+            }
+
+                .navbar-nav .nav-link:hover {
+                    color: #00aaff; /* Light blue on hover */
+                }
+
+            .nav-separator {
+                color: #ffffff; /* White color for separator */
+                margin: 0 0.5rem;
+                font-size: 1.2rem;
+            }
+
+            /* NavigationBar */
+            .custom-navbar {
+                background-color: #f0f5ff; /* Light background color */
+                padding: 0.5rem 1rem;
+            }
+
+            .logo-box {
+                width: 40px;
+                height: 40px;
+                background-color: #007bff; /* Blue background */
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 1.2rem;
+                border-radius: 8px; /* Rounded corners */
+                margin-right: 8px;
+            }
+
+            .brand-name {
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: #0a1931; /* Dark blue text color */
+            }
+
+            .navbar-nav .nav-link {
+                font-size: 1rem;
+                color: #1a1a2e;
+                margin: 0 10px;
+                padding: 8px 12px;
+                border-radius: 8px;
+                transition: background-color 0.3s ease, color 0.3s ease;
+            }
+
+                .navbar-nav .nav-link:hover,
+                .navbar-nav .nav-link.active {
+                    background-color: #0a1931; /* Dark blue background */
+                    color: white; /* White text on hover */
+                }
+
+            .navbar-icons .icon-link {
+                color: #1a1a2e;
+                font-size: 1.2rem;
+                margin-left: 20px;
+                position: relative;
+            }
+
+            .cart-badge {
+                position: absolute;
+                top: -5px;
+                right: -10px;
+                background-color: #007bff; /* Blue badge color */
+                color: white;
+                border-radius: 50%;
+                padding: 0.25rem 0.5rem;
+                font-size: 0.75rem;
+                font-weight: bold;
+            }
+        </style>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code {
+    private bool IsAuthenticated = false;
+    private string UserName = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        IsAuthenticated = user.Identity?.IsAuthenticated ?? false;
+        if (IsAuthenticated)
+        {
+            UserName = user.Identity?.Name ?? "User"; // Retrieve the name claim
+        }
+
+        AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+    }
+
+    private async void OnAuthenticationStateChanged(Task<AuthenticationState> task)
+    {
+        var authState = await task;
+        var user = authState.User;
+
+        IsAuthenticated = user.Identity?.IsAuthenticated ?? false;
+        if (IsAuthenticated)
+        {
+            UserName = user.Identity?.Name ?? "User";
+        }
+        else
+        {
+            UserName = string.Empty;
+        }
+
+        StateHasChanged(); // Trigger UI refresh
+    }
+
+    private void Logout()
+    {
+        var customAuthProvider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
+        customAuthProvider.MarkUserAsLoggedOut();
+        IsAuthenticated = false;
+        UserName = string.Empty;
+        NavigationManager.NavigateTo("/login");
+    }
+
+    public void Dispose()
+    {
+        AuthenticationStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
+    }
+}
